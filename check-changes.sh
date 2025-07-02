@@ -203,16 +203,27 @@ echo "Found $changed_count matching changed files" >&2
 # Write GitHub Actions job summary if requested
 if [[ "$(printf '%s' "$INPUT_SUMMARY" | tr '[:upper:]' '[:lower:]')" == "true" ]]; then
   {
-    echo "### Check Changes Summary"
+    echo "### 🔍 Change Detection Summary"
     echo ""
-    echo "**Changed:** $([[ $changed_count -gt 0 ]] && echo 'Yes' || echo 'No')"
-    echo "**Changed Files Count:** $changed_count"
+    echo "| Key | Value |"
+    echo "|-----|-------|"
+    echo "| **Changed** | $([[ $changed_count -gt 0 ]] && echo 'Yes' || echo 'No') |"
+    echo "| **Changed Files Count** | $changed_count |"
     if [[ $changed_count -gt 0 ]]; then
       echo ""
-      echo "**Changed Files:**"
+      if [[ $changed_count -gt 10 ]]; then
+        echo "<details><summary>Changed Files ($changed_count)</summary>"
+        echo ""
+      else
+        echo "**Changed Files:**"
+      fi
       for file in "${matching_files[@]}"; do
         echo "- \`$file\`"
       done
+      if [[ $changed_count -gt 10 ]]; then
+        echo "</details>"
+      fi
     fi
+    echo "\n---"
   } >> "$GITHUB_STEP_SUMMARY"
 fi 

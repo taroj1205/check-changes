@@ -266,9 +266,12 @@ test('writes a Markdown summary when summary input is true', async () => {
 
   // Check summary output
   const summary = await readFile(summaryPath, 'utf-8');
-  expect(summary).toContain('### Check Changes Summary');
-  expect(summary).toContain('**Changed:** Yes');
-  expect(summary).toContain('**Changed Files Count:** 2');
+  expect(summary).toContain('### 🔍 Change Detection Summary');
+  expect(summary).toContain('| Key | Value |');
+  expect(summary).toContain('| **Changed** | Yes |');
+  expect(summary).toContain('| **Changed Files Count** | 2 |');
+  expect(summary).toContain('**Changed Files:**');
   expect(summary).toContain('`src/index.js`');
   expect(summary).toContain('`src/utils.js`');
+  expect(summary).toContain('---');
 });
