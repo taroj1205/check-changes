@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/taroj1205/check-changes/compare/v1.2.0...v1.2.1) (2025-07-02)
+
+
+### Bug Fixes
+
+* **check-changes:** remove extra line at the end ([#8](https://github.com/taroj1205/check-changes/issues/8)) ([3efe95d](https://github.com/taroj1205/check-changes/commit/3efe95d3db5a3db691fdde9e4d577383cea97ac6))
+
 ## [1.2.0](https://github.com/taroj1205/check-changes/compare/v1.1.0...v1.2.0) (2025-07-02)
 
 
