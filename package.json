@@ -36,6 +36,7 @@
     "@commitlint/config-conventional": "^19.8.1",
     "@types/bun": "latest",
     "commitlint": "^19.8.1",
-    "lefthook": "^1.11.14"
+    "lefthook": "^1.11.14",
+    "ultracite": "^5.0.29"
   }
 }
