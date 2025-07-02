@@ -1,11 +1,7 @@
 pre-commit:
   commands:
-    format:
-      glob: "*.{js,ts,json,yml,yaml,md}"
-      run: bun run format
     lint:
-      glob: "*.{js,ts}"
-      run: bun run lint
+      run: bun run check
     test:
       run: bun test
 
