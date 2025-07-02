@@ -224,6 +224,5 @@ if [[ "$(printf '%s' "$INPUT_SUMMARY" | tr '[:upper:]' '[:lower:]')" == "true" ]
         echo "</details>"
       fi
     fi
-    echo "\n---"
   } >> "$GITHUB_STEP_SUMMARY"
 fi 
