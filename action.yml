@@ -1,0 +1,50 @@
+name: "Check Changes"
+description: "Fast file change detection with include/exclude glob patterns"
+author: "taroj1205"
+
+branding:
+  icon: "filter"
+  color: "blue"
+
+inputs:
+  include:
+    description: "Glob patterns for files to include (newline or comma separated)"
+    required: false
+    default: "**/*"
+  exclude:
+    description: "Glob patterns for files to exclude (newline or comma separated)"
+    required: false
+    default: ""
+  base:
+    description: "Base branch or commit to compare against"
+    required: false
+    default: ""
+  token:
+    description: "GitHub token for API access"
+    required: false
+    default: ${{ github.token }}
+  list-files:
+    description: "Output format for changed files list (none, shell, json)"
+    required: false
+    default: "none"
+
+outputs:
+  changed:
+    description: "Boolean indicating if any files matching the patterns were changed"
+  changed_files:
+    description: "List of changed files (format depends on list-files input)"
+  changes_count:
+    description: "Number of changed files matching the patterns"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check file changes
+      run: ${{ github.action_path }}/check-changes.sh
+      shell: bash
+      env:
+        INPUT_INCLUDE: ${{ inputs.include }}
+        INPUT_EXCLUDE: ${{ inputs.exclude }}
+        INPUT_BASE: ${{ inputs.base }}
+        INPUT_TOKEN: ${{ inputs.token }}
+        INPUT_LIST_FILES: ${{ inputs.list-files }}

@@ -1,0 +1,41 @@
+{
+  "name": "check-changes",
+  "version": "0.0.0",
+  "description": "Fast GitHub Action for file change detection with include/exclude glob patterns",
+  "type": "module",
+  "private": false,
+  "main": "check-changes.sh",
+  "keywords": [
+    "github-action",
+    "change-detection",
+    "git",
+    "glob",
+    "fast",
+    "ci-cd"
+  ],
+  "author": "taroj1205",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/taroj1205/check-changes"
+  },
+  "homepage": "https://github.com/taroj1205/check-changes",
+  "bugs": {
+    "url": "https://github.com/taroj1205/check-changes/issues"
+  },
+  "scripts": {
+    "format": "biome format --write .",
+    "lint": "biome lint .",
+    "check": "biome check .",
+    "test": "bun test",
+    "test:watch": "bun test --watch"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.0.6",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@types/bun": "latest",
+    "commitlint": "^19.8.1",
+    "lefthook": "^1.11.14"
+  }
+}

@@ -1,0 +1,91 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - name: Release Please
+        id: release
+        uses: google-github-actions/release-please-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: simple
+
+  update-major-tag:
+    needs: release-please
+    runs-on: ubuntu-latest
+    if: needs.release-please.outputs.release_created == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update major version tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Get the tag name from release-please (e.g., v1.2.3)
+          TAG_NAME="${{ needs.release-please.outputs.tag_name }}"
+
+          # Extract major version (e.g., v1 from v1.2.3)
+          MAJOR_VERSION=$(echo $TAG_NAME | sed -E 's/^v([0-9]+)\..*/v\1/')
+
+          echo "Updating major version tag $MAJOR_VERSION to point to $TAG_NAME"
+
+          # Create or update the major version tag
+          git tag -fa $MAJOR_VERSION -m "Update $MAJOR_VERSION to $TAG_NAME"
+          git push origin $MAJOR_VERSION --force
+
+  marketplace:
+    needs: release-please
+    runs-on: ubuntu-latest
+    if: needs.release-please.outputs.release_created == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run tests
+        run: bun test
+
+      - name: Validate action
+        run: |
+          # Ensure action.yml is valid
+          if [ ! -f action.yml ]; then
+            echo "❌ action.yml not found"
+            exit 1
+          fi
+
+          # Ensure shell script is executable
+          if [ ! -x check-changes.sh ]; then
+            echo "❌ check-changes.sh is not executable"
+            exit 1
+          fi
+
+          echo "✅ Action validation passed"
+
+      - name: Publish to GitHub Marketplace
+        run: |
+          echo "🚀 Action published to GitHub Marketplace!"
+          echo "📦 Version: ${{ needs.release-please.outputs.tag_name }}"
+          echo "🔗 Users can now use: taroj1205/check-changes@${{ needs.release-please.outputs.tag_name }}"
+          echo "🔗 Or use major version: taroj1205/check-changes@v$(echo ${{ needs.release-please.outputs.tag_name }} | sed -E 's/^v([0-9]+)\..*/\1/')"
