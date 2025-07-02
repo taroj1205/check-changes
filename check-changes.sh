@@ -201,7 +201,7 @@ esac
 echo "Found $changed_count matching changed files" >&2
 
 # Write GitHub Actions job summary if requested
-if [[ "${INPUT_SUMMARY,,}" == "true" ]]; then
+if [[ "$(printf '%s' "$INPUT_SUMMARY" | tr '[:upper:]' '[:lower:]')" == "true" ]]; then
   {
     echo "### Check Changes Summary"
     echo ""
