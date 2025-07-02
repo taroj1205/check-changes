@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/taroj1205/check-changes/compare/v1.0.0...v1.0.1) (2025-07-02)
+
+
+### Bug Fixes
+
+* **action:** export outputs for github ([6329d27](https://github.com/taroj1205/check-changes/commit/6329d27544815d837e939df29d008401706ee782))
+
 ## 1.0.0 (2025-07-02)
 
 
