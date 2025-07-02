@@ -40,6 +40,7 @@ runs:
   using: "composite"
   steps:
     - name: Check file changes
+      id: check
       run: ${{ github.action_path }}/check-changes.sh
       shell: bash
       env:
@@ -47,4 +48,11 @@ runs:
         INPUT_EXCLUDE: ${{ inputs.exclude }}
         INPUT_BASE: ${{ inputs.base }}
         INPUT_TOKEN: ${{ inputs.token }}
-        INPUT_LIST_FILES: ${{ inputs.list-files }}
+        INPUT_LIST_FILES: ${{ inputs['list-files'] }}
+
+    - name: Export outputs
+      shell: bash
+      run: |
+        echo "changed=${{ steps.check.outputs.changed }}" >> $GITHUB_OUTPUT
+        echo "changed_files=${{ steps.check.outputs.changed_files }}" >> $GITHUB_OUTPUT
+        echo "changes_count=${{ steps.check.outputs.changes_count }}" >> $GITHUB_OUTPUT
