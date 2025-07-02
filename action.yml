@@ -27,14 +27,21 @@ inputs:
     description: "Output format for changed files list (none, shell, json)"
     required: false
     default: "none"
+  summary:
+    description: "If true, outputs a Markdown summary to the workflow run"
+    required: false
+    default: "false"
 
 outputs:
   changed:
     description: "Boolean indicating if any files matching the patterns were changed"
+    value: ${{ steps.check.outputs.changed }}
   changed_files:
     description: "List of changed files (format depends on list-files input)"
+    value: ${{ steps.check.outputs.changed_files }}
   changes_count:
     description: "Number of changed files matching the patterns"
+    value: ${{ steps.check.outputs.changes_count }}
 
 runs:
   using: "composite"
@@ -49,10 +56,4 @@ runs:
         INPUT_BASE: ${{ inputs.base }}
         INPUT_TOKEN: ${{ inputs.token }}
         INPUT_LIST_FILES: ${{ inputs['list-files'] }}
-
-    - name: Export outputs
-      shell: bash
-      run: |
-        echo "changed=${{ steps.check.outputs.changed }}" >> $GITHUB_OUTPUT
-        echo "changed_files=${{ steps.check.outputs.changed_files }}" >> $GITHUB_OUTPUT
-        echo "changes_count=${{ steps.check.outputs.changes_count }}" >> $GITHUB_OUTPUT
+        INPUT_SUMMARY: ${{ inputs.summary }}

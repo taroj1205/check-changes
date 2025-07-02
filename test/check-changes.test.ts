@@ -238,3 +238,37 @@ test('works with custom base reference', async () => {
   expect(output).toContain('changed=true');
   expect(output).toContain('changes_count=1');
 });
+
+test('writes a Markdown summary when summary input is true', async () => {
+  // Create files
+  await createFile('src/index.js', 'code');
+  await createFile('src/utils.js', 'utils');
+  await $`git add .`;
+  await $`git commit -m "Add files"`;
+
+  // Modify files
+  await createFile('src/index.js', 'modified code');
+  await createFile('src/utils.js', 'modified utils');
+
+  // Set environment for summary output
+  process.env.INPUT_INCLUDE = 'src/**/*';
+  process.env.INPUT_EXCLUDE = '';
+  process.env.INPUT_LIST_FILES = 'none';
+  process.env.INPUT_SUMMARY = 'true';
+  process.env.GITHUB_OUTPUT = join(testRepo, 'output.txt');
+  const summaryPath = join(testRepo, 'summary.md');
+  process.env.GITHUB_STEP_SUMMARY = summaryPath;
+
+  // Run the script
+  const result = await $`bash ${join(originalCwd, 'check-changes.sh')}`.quiet();
+
+  expect(result.exitCode).toBe(0);
+
+  // Check summary output
+  const summary = await readFile(summaryPath, 'utf-8');
+  expect(summary).toContain('### Check Changes Summary');
+  expect(summary).toContain('**Changed:** Yes');
+  expect(summary).toContain('**Changed Files Count:** 2');
+  expect(summary).toContain('`src/index.js`');
+  expect(summary).toContain('`src/utils.js`');
+});

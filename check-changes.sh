@@ -198,4 +198,21 @@ case "$list_files" in
         ;;
 esac
 
-echo "Found $changed_count matching changed files" >&2 
+echo "Found $changed_count matching changed files" >&2
+
+# Write GitHub Actions job summary if requested
+if [[ "${INPUT_SUMMARY,,}" == "true" ]]; then
+  {
+    echo "### Check Changes Summary"
+    echo ""
+    echo "**Changed:** $([[ $changed_count -gt 0 ]] && echo 'Yes' || echo 'No')"
+    echo "**Changed Files Count:** $changed_count"
+    if [[ $changed_count -gt 0 ]]; then
+      echo ""
+      echo "**Changed Files:**"
+      for file in "${matching_files[@]}"; do
+        echo "- \`$file\`"
+      done
+    fi
+  } >> "$GITHUB_STEP_SUMMARY"
+fi 
