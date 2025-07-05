@@ -9,6 +9,8 @@ on:
 jobs:
   check_changes:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       changed: ${{ steps.changes.outputs.changed }}
     steps:
@@ -18,9 +20,15 @@ jobs:
       - name: Check for changes
         uses: ./
         with:
-          include: "**/*.md,**/*.yml"
-          exclude: "**/node_modules/**/*"
-          list-files: json
+          base: ${{ github.event_name == 'push' && github.event.before || '' }}
+          include: "**/*"
+          exclude: |
+            **/*.md
+            .gitignore
+            .gitattributes
+            .vscode/**/*
+            renovate.json
+          summary: true
 
       - name: Verify outputs
         run: |
