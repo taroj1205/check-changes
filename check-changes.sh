@@ -69,7 +69,7 @@ matches_patterns() {
             # Remove leading/trailing whitespace
             pattern=$(echo "$pattern" | xargs)
             if matches_glob "$file" "$pattern"; then
-                return 1  # File is excluded
+                return 1  # File is explicitly excluded
             fi
         done <<< "$exclude_patterns"
     fi
@@ -84,7 +84,7 @@ matches_patterns() {
                 return 0  # File is included
             fi
         done <<< "$include_patterns"
-        return 1  # File doesn't match any include pattern
+        return 2  # File doesn't match any include pattern
     fi
     
     return 0  # No include patterns means include all (except excluded)
@@ -133,19 +133,23 @@ staged_files=$(git diff --name-only --cached 2>/dev/null || true)
 # Combine all changed files and remove duplicates
 changed_files=$(printf "%s\n%s\n%s\n" "$committed_files" "$working_files" "$staged_files" | sort -u | grep -v '^$' || true)
 
-
-
 # Arrays to store results
 matching_files=()
+excluded_files=()
 changed_count=0
 
 # Process each changed file
 while IFS= read -r file; do
     [[ -z "$file" ]] && continue
-    
+
     if matches_patterns "$file" "$include_patterns" "$exclude_patterns"; then
         matching_files+=("$file")
         changed_count=$((changed_count + 1))
+    else
+        result=$?
+        if [[ $result -eq 1 ]]; then
+            excluded_files+=("$file")
+        fi
     fi
 done <<< "$changed_files"
 
@@ -221,6 +225,21 @@ if [[ "$(printf '%s' "$INPUT_SUMMARY" | tr '[:upper:]' '[:lower:]')" == "true" ]
         echo "- \`$file\`"
       done
       if [[ $changed_count -gt 10 ]]; then
+        echo "</details>"
+      fi
+    fi
+    if [[ ${#excluded_files[@]} -gt 0 ]]; then
+      echo ""
+      if [[ ${#excluded_files[@]} -gt 10 ]]; then
+        echo "<details><summary>Excluded Files (${#excluded_files[@]})</summary>"
+        echo ""
+      else
+        echo "**Excluded Files:**"
+      fi
+      for file in "${excluded_files[@]}"; do
+        echo "- \`$file\`"
+      done
+      if [[ ${#excluded_files[@]} -gt 10 ]]; then
         echo "</details>"
       fi
     fi

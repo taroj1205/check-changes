@@ -275,3 +275,87 @@ test('writes a Markdown summary when summary input is true', async () => {
   expect(summary).toContain('`src/utils.js`');
   expect(summary).toContain('---');
 });
+
+test('writes a Markdown summary with excluded files', async () => {
+  // Create files
+  await createFile('src/index.js', 'code');
+  await createFile('src/test.spec.js', 'test();');
+  await $`git add .`;
+  await $`git commit -m "Add files"`;
+
+  // Modify files
+  await createFile('src/index.js', 'modified code');
+  await createFile('src/test.spec.js', 'modified test');
+
+  // Set environment for summary output with exclusion
+  process.env.INPUT_INCLUDE = 'src/**/*';
+  process.env.INPUT_EXCLUDE = '**/*.spec.js';
+  process.env.INPUT_LIST_FILES = 'none';
+  process.env.INPUT_SUMMARY = 'true';
+  process.env.GITHUB_OUTPUT = join(testRepo, 'output.txt');
+  const summaryPath = join(testRepo, 'summary.md');
+  process.env.GITHUB_STEP_SUMMARY = summaryPath;
+
+  // Run the script
+  const result = await $`bash ${join(originalCwd, 'check-changes.sh')}`.quiet();
+
+  expect(result.exitCode).toBe(0);
+
+  // Check summary output
+  const summary = await readFile(summaryPath, 'utf-8');
+  expect(summary).toContain('### 🔍 Change Detection Summary');
+  expect(summary).toContain('| **Changed** | Yes |');
+  expect(summary).toContain('| **Changed Files Count** | 1 |');
+  expect(summary).toContain('**Changed Files:**');
+  expect(summary).toContain('`src/index.js`');
+
+  const changedFilesSection = summary.split('**Excluded Files:**')[0];
+  expect(changedFilesSection).not.toContain('`src/test.spec.js`');
+
+  expect(summary).toContain('**Excluded Files:**');
+  expect(summary).toContain('`src/test.spec.js`');
+});
+
+test('writes a Markdown summary with more than 10 excluded files in a details block', async () => {
+  // Create initial files
+  await createFile('src/index.js', 'code');
+  const createPromises: Promise<void>[] = [];
+  for (let i = 0; i < 11; i++) {
+    createPromises.push(createFile(`src/test-${i}.spec.js`, `test ${i}`));
+  }
+  await Promise.all(createPromises);
+  await $`git add .`;
+  await $`git commit -m "Add initial files"`;
+
+  // Modify all files
+  await createFile('src/index.js', 'modified code');
+  const modifyPromises: Promise<void>[] = [];
+  for (let i = 0; i < 11; i++) {
+    modifyPromises.push(
+      createFile(`src/test-${i}.spec.js`, `modified test ${i}`)
+    );
+  }
+  await Promise.all(modifyPromises);
+
+  // Set environment for summary output with exclusion
+  process.env.INPUT_INCLUDE = 'src/**/*';
+  process.env.INPUT_EXCLUDE = '**/*.spec.js';
+  process.env.INPUT_LIST_FILES = 'none';
+  process.env.INPUT_SUMMARY = 'true';
+  process.env.GITHUB_OUTPUT = join(testRepo, 'output.txt');
+  const summaryPath = join(testRepo, 'summary.md');
+  process.env.GITHUB_STEP_SUMMARY = summaryPath;
+
+  // Run the script
+  const result = await $`bash ${join(originalCwd, 'check-changes.sh')}`.quiet();
+
+  expect(result.exitCode).toBe(0);
+
+  const summary = await readFile(summaryPath, 'utf-8');
+  expect(summary).toContain('<details><summary>Excluded Files (11)</summary>');
+  for (let i = 0; i < 11; i++) {
+    expect(summary).toContain(`- \`src/test-${i}.spec.js\``);
+  }
+  expect(summary).toContain('</details>');
+  expect(summary).toContain('`src/index.js`');
+});
