@@ -12,12 +12,13 @@ jobs:
     permissions:
       contents: read
     outputs:
-      changed: ${{ steps.changes.outputs.changed }}
+      changed: ${{ steps.filter.outputs.changed }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Check for changes
+        id: filter
         uses: ./
         with:
           base: ${{ github.event_name == 'push' && github.event.before || '' }}
