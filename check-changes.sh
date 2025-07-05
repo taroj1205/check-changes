@@ -229,6 +229,7 @@ if [[ "$(printf '%s' "$INPUT_SUMMARY" | tr '[:upper:]' '[:lower:]')" == "true" ]
       fi
     fi
     if [[ ${#excluded_files[@]} -gt 0 ]]; then
+      mapfile -t excluded_files < <(printf "%s\n" "${excluded_files[@]}" | sort)
       echo ""
       if [[ ${#excluded_files[@]} -gt 10 ]]; then
         echo "<details><summary>Excluded Files (${#excluded_files[@]})</summary>"
